@@ -174,3 +174,4 @@ the first sign-up you try doesn't drop you straight into the dashboard.
 5. Add phone verification (SMS/WhatsApp OTP) before letting anyone look up or
    cancel a booking by phone number.
 # Booktau
+# Booktau
