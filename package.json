@@ -1,0 +1,23 @@
+{
+  "name": "booktau",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "TZ='Asia/Almaty' node lib/__tests__/availability.test.mjs && node lib/__tests__/booking-errors.test.mjs"
+  },
+  "dependencies": {
+    "next": "16.3.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "@supabase/supabase-js": "^2.45.0",
+    "@supabase/ssr": "^0.12.4"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8",
+    "autoprefixer": "^10.0.1"
+  }
+}
