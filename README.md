@@ -124,6 +124,31 @@ projects), a brand-new sign-up won't get an active session until they click the
 email link. The code handles that case, but it's worth knowing before you wonder why
 the first sign-up you try doesn't drop you straight into the dashboard.
 
+## What a second, independent pass found
+
+Re-verified the claims above against a real local Postgres instance loaded with the
+actual, unmodified `schema.sql` — not by reading it, by running it — using 13
+targeted rule tests plus 5 rounds of genuinely concurrent booking requests for the
+identical slot (two live connections racing each other, not two sequential calls).
+Everything above held up under that. One real bug turned up that reading alone had
+missed:
+
+- **Real bug, now fixed:** every `raise exception 'code' using message = '...'` in
+  `create_booking()` was invalid PL/pgSQL — the literal string right after
+  `exception` already sets the error MESSAGE, so the trailing `using message = ...`
+  tried to set it a second time. Postgres threw `RAISE option already specified:
+  MESSAGE` instead of the intended error. Bookings were still correctly rejected
+  either way (the malformed raise still aborts before the insert runs), but every
+  specific error code was swallowed, so `booking-errors.js` never got a chance to
+  show a real customer anything but a generic "Something went wrong" — including
+  for routine, expected cases like a slot someone else just took. Fixed identically
+  in both `schema.sql` and `migrations/001_booking_integrity.sql`, which define the
+  same function.
+- Added `supabase/tests/` — a real, re-runnable suite (`npm run test:sql`) covering
+  every rule above plus the concurrency test, so this doesn't have to be
+  re-verified by hand again next time `create_booking()` changes. See
+  `supabase/tests/README.md` for one-time local setup.
+
 ## Setup (about 15 minutes)
 
 1. Create a free project at **supabase.com** — no credit card needed.
@@ -149,6 +174,12 @@ the first sign-up you try doesn't drop you straight into the dashboard.
 8. From the dashboard, add a service or two, then open `/your-slug` in another
    tab and book something. Check the `bookings` table in Supabase — it's actually
    there.
+
+Before touching `create_booking()` or the RLS policies again, run
+`npm run test:sql` (needs a local Postgres — see `supabase/tests/README.md`).
+It exercises the actual rules — including two simultaneous booking requests
+for the same slot — against `schema.sql` directly, without needing a
+Supabase project.
 
 ## Deploying for real
 
