@@ -86,13 +86,13 @@ begin
   p_customer_phone := nullif(trim(p_customer_phone), '');
 
   if p_customer_name is null then
-    raise exception 'invalid_input' using message = 'Customer name is required';
+    raise exception using message = 'invalid_input: Customer name is required';
   end if;
   if p_customer_phone is null or length(p_customer_phone) < 6 then
-    raise exception 'invalid_input' using message = 'Valid phone number is required';
+    raise exception using message = 'invalid_input: Valid phone number is required';
   end if;
   if p_booking_time !~ '^\d{2}:\d{2}$' then
-    raise exception 'invalid_input' using message = 'Invalid booking time format';
+    raise exception using message = 'invalid_input: Invalid booking time format';
   end if;
 
   -- Service must exist and belong to this shop
@@ -101,7 +101,7 @@ begin
   where id = p_service_id and shop_id = p_shop_id;
 
   if not found then
-    raise exception 'invalid_service' using message = 'Service not found for this shop';
+    raise exception using message = 'invalid_service: Service not found for this shop';
   end if;
 
   -- Blocked date
@@ -109,7 +109,7 @@ begin
     select 1 from blocked_dates
     where shop_id = p_shop_id and date = p_booking_date
   ) then
-    raise exception 'blocked_date' using message = 'This date is not available';
+    raise exception using message = 'blocked_date: This date is not available';
   end if;
 
   -- Working hours for this weekday (matches JS getDayKey: Sun=0 … Sat=6)
@@ -123,7 +123,7 @@ begin
   where shop_id = p_shop_id and day_key = v_day_key;
 
   if not found or v_day_hours.closed or v_day_hours.open_time is null or v_day_hours.close_time is null then
-    raise exception 'shop_closed' using message = 'Shop is closed on this day';
+    raise exception using message = 'shop_closed: Shop is closed on this day';
   end if;
 
   v_open_min := public.time_to_minutes(v_day_hours.open_time);
@@ -132,14 +132,14 @@ begin
   v_end_min := v_start_min + v_service.duration_minutes;
 
   if v_start_min < v_open_min or v_end_min > v_close_min then
-    raise exception 'outside_hours' using message = 'Selected time is outside working hours';
+    raise exception using message = 'outside_hours: Selected time is outside working hours';
   end if;
 
   if v_day_hours.lunch_start is not null and v_day_hours.lunch_end is not null then
     v_lunch_start := public.time_to_minutes(v_day_hours.lunch_start);
     v_lunch_end := public.time_to_minutes(v_day_hours.lunch_end);
     if public.booking_intervals_overlap(v_start_min, v_service.duration_minutes, v_lunch_start, v_lunch_end - v_lunch_start) then
-      raise exception 'lunch_break' using message = 'Selected time overlaps lunch break';
+      raise exception using message = 'lunch_break: Selected time overlaps lunch break';
     end if;
   end if;
 
@@ -151,18 +151,18 @@ begin
   );
 
   if p_booking_date < v_today then
-    raise exception 'past_date' using message = 'Cannot book in the past';
+    raise exception using message = 'past_date: Cannot book in the past';
   end if;
   if p_booking_date = v_today and v_start_min <= v_now_min then
-    raise exception 'past_time' using message = 'Cannot book a time that has already passed';
+    raise exception using message = 'past_time: Cannot book a time that has already passed';
   end if;
 
   -- Rate limits (same caps as RLS policies; enforced here because SECURITY DEFINER bypasses RLS)
   if public.recent_booking_count_for_shop(p_shop_id, 10) >= 20 then
-    raise exception 'rate_limited' using message = 'Too many bookings for this shop — try again later';
+    raise exception using message = 'rate_limited: Too many bookings for this shop — try again later';
   end if;
   if public.recent_booking_count_for_phone(p_customer_phone, 10) >= 5 then
-    raise exception 'rate_limited' using message = 'Too many bookings from this phone — try again later';
+    raise exception using message = 'rate_limited: Too many bookings from this phone — try again later';
   end if;
 
   -- Serialize concurrent bookings for the same shop/day
@@ -180,7 +180,7 @@ begin
         b.duration_minutes
       )
   ) then
-    raise exception 'slot_taken' using message = 'This time slot was just taken — pick another';
+    raise exception using message = 'slot_taken: This time slot was just taken — pick another';
   end if;
 
   insert into bookings (
