@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "TZ='Asia/Almaty' node lib/__tests__/availability.test.mjs && node lib/__tests__/booking-errors.test.mjs"
+    "test": "TZ='Asia/Almaty' node lib/__tests__/availability.test.mjs && node lib/__tests__/booking-errors.test.mjs",
+    "test:sql": "bash supabase/tests/run.sh"
   },
   "dependencies": {
     "next": "16.3.0",
@@ -18,6 +19,7 @@
   "devDependencies": {
     "tailwindcss": "^3.4.1",
     "postcss": "^8",
-    "autoprefixer": "^10.0.1"
+    "autoprefixer": "^10.0.1",
+    "pg": "^8.13.0"
   }
 }
