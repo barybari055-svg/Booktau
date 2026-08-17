@@ -46,6 +46,9 @@ export default function LoginPage() {
           required
           className="border rounded-lg p-3 w-full text-base"
         />
+        <p className="text-right">
+          <a href="/forgot-password" className="text-sm text-gray-500 underline">Forgot password?</a>
+        </p>
         {error && <p className="text-red-600 text-sm">{error}</p>}
         <button
           type="submit"
