@@ -96,6 +96,14 @@ export default function BookingPage() {
       booking_time: data.booking_time,
       duration_minutes: data.duration_minutes,
     }]);
+
+    // Best-effort only: the booking is already confirmed and saved above,
+    // so a failed or slow SMS should never affect what the customer sees.
+    fetch('/api/send-confirmation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ booking_id: data.id, phone: data.customer_phone }),
+    }).catch((err) => console.error('Confirmation SMS request failed:', err));
   }
 
   if (loading) {

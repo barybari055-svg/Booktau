@@ -344,5 +344,32 @@ $$;
 revoke all on function public.create_booking(uuid, uuid, date, text, text, text) from public;
 grant execute on function public.create_booking(uuid, uuid, date, text, text, text) to anon, authenticated;
 
+-- Used by the send-confirmation API route to look up what to text a
+-- customer after a booking. Deliberately narrow: returns data only when
+-- the caller already knows BOTH the booking id and the exact phone number
+-- on that booking, so this can't be used to pull details for a booking
+-- that isn't yours, or as a way to send SMS to arbitrary numbers.
+create or replace function public.get_booking_for_confirmation(p_booking_id uuid, p_phone text)
+returns table (
+  shop_name text,
+  service_name text,
+  booking_date date,
+  booking_time text
+)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select s.name, b.service_name, b.booking_date, b.booking_time
+  from bookings b
+  join shops s on s.id = b.shop_id
+  where b.id = p_booking_id
+    and b.customer_phone = p_phone;
+$$;
+
+revoke all on function public.get_booking_for_confirmation(uuid, text) from public;
+grant execute on function public.get_booking_for_confirmation(uuid, text) to anon, authenticated;
+
 -- NOTE: owners read/edit only their own shop; public reads shop info via RLS;
 -- bookings are written only through create_booking(). Re-verify on a live Supabase project.
