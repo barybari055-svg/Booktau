@@ -26,12 +26,17 @@ A running log for portfolio and team context. Real problems, real tradeoffs.
 
 ---
 
-## ADR-002: Kazakhstan data residency (pending)
+## ADR-002: Kazakhstan data residency (deferred, not blocked)
 
-**Status:** Blocked on legal counsel
+**Status:** Continuing on Supabase for now; revisit once legal counsel answers the open question below
 
-**Context:** Kazakh personal data may require in-country storage. Supabase has no Kazakhstan region.
+**Context:** Kazakh personal data may require in-country storage under Law No. 94-V (2013) — this predates and is separate from the new provisions taking effect 2026-08-25 (breach registry, processor registry, public-data-source rules), which do not appear to touch the core storage-location requirement. Supabase has no Kazakhstan region.
 
-**Decision:** Do not claim compliance in privacy policy. Resolve with lawyer before marketing to KZ businesses at scale.
+**Decision:** Continue building on Supabase rather than migrating now. The schema, RLS policies, and `SECURITY DEFINER` functions (ADR-001) are standard Postgres with nothing Supabase-proprietary in them, so a later migration carries over almost all of the tested logic — deferring is low sunk-cost, not a corner being cut.
 
-**Options later:** KZ-hosted Postgres, local provider, or limit market until compliant infrastructure exists.
+**If/when migration is needed:** self-host Supabase's own open-source stack (Postgres + Auth + PostgREST) on Kazakhstan-based infrastructure, rather than building custom auth/API from scratch. Real options exist and were confirmed, not assumed: ps.kz and Serverspace both offer VPS hosting with data centers physically in Almaty. The app code changes minimally (same client calls, different server); the real cost is taking on backups, security patching, and uptime monitoring ourselves — an ongoing operational responsibility, not a one-time task.
+
+**Open question for counsel:** does the law require data to live *exclusively* in Kazakhstan, or does a compliant local copy/backup satisfy it with primary processing elsewhere? This determines whether the eventual path is "replace the backend" or something much lighter.
+
+**Do not claim compliance in the privacy policy until this is resolved.**
+
