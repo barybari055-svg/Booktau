@@ -57,7 +57,7 @@ function FinishSetup({ userId, onDone }) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { shop, error: shopError } = await createShopForOwner(userId, { name: shopName, category });
+    const { shop, error: shopError } = await createShopForOwner({ name: shopName, category });
     setLoading(false);
     if (shopError) {
       setError('Could not save your shop: ' + shopError.message);
@@ -211,6 +211,20 @@ export default function DashboardPage() {
     }
   }
 
+  const [repairingHours, setRepairingHours] = useState(false);
+
+  // Recovery path for a shop that ended up with zero hours rows -- possible
+  // for any shop created before create_shop_with_defaults() existed. Every
+  // day would otherwise show as permanently closed with no way to fix it.
+  async function repairMissingHours() {
+    setRepairingHours(true);
+    const { data, error } = await supabase.rpc('add_default_hours_if_missing', { p_shop_id: shop.id });
+    setRepairingHours(false);
+    if (!error && data) {
+      setHours(data);
+    }
+  }
+
   async function addBlockedDate() {
     if (!newBlockedDate) return;
     const { data, error } = await supabase
@@ -313,6 +327,21 @@ export default function DashboardPage() {
       </form>
 
       <h2 className="font-semibold mb-3">Working hours</h2>
+      {hours.length === 0 ? (
+        <div className="border rounded-xl p-4 mb-6 text-sm">
+          <p className="text-gray-500 mb-3">
+            Working hours aren't set up yet, so every day currently shows as closed
+            to customers.
+          </p>
+          <button
+            onClick={repairMissingHours}
+            disabled={repairingHours}
+            className="bg-black text-white rounded-lg px-4 py-2 text-sm disabled:opacity-30"
+          >
+            {repairingHours ? 'Setting up…' : 'Set up default hours'}
+          </button>
+        </div>
+      ) : (
       <div className="border rounded-xl divide-y mb-6">
         {DAY_KEYS.map((dayKey) => {
           const h = hours.find((x) => x.day_key === dayKey);
@@ -368,6 +397,7 @@ export default function DashboardPage() {
           );
         })}
       </div>
+      )}
 
       <h2 className="font-semibold mb-3">Days off</h2>
       <div className="space-y-2 mb-3">
