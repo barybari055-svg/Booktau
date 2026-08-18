@@ -39,7 +39,7 @@ export default function SignupPage() {
       return;
     }
 
-    const { error: shopError } = await createShopForOwner(authData.user.id, { name: shopName, category });
+    const { error: shopError } = await createShopForOwner({ name: shopName, category });
     setLoading(false);
 
     if (shopError) {
