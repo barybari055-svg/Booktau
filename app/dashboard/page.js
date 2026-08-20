@@ -15,12 +15,12 @@ function BookingRow({ booking, onCancel }) {
   const [confirming, setConfirming] = useState(false);
   return (
     <div className="border rounded-xl p-3 text-sm">
-      <div className="flex justify-between">
-        <div>
+      <div className="flex justify-between gap-2">
+        <div className="min-w-0">
           <p className="font-medium">{booking.customer_name}</p>
           <p className="text-gray-500">{booking.service_name} · {booking.customer_phone}</p>
         </div>
-        <div className="text-right font-mono">
+        <div className="text-right font-mono shrink-0">
           <p>{booking.booking_date}</p>
           <p>{booking.booking_time}</p>
         </div>
@@ -293,9 +293,9 @@ export default function DashboardPage() {
       <h2 className="font-semibold mb-3">Services</h2>
       <div className="space-y-2 mb-3">
         {services.map((s) => (
-          <div key={s.id} className="border rounded-xl p-3 flex justify-between items-center text-sm">
-            <span>{s.name} · {s.duration_minutes} min · {s.price} ₸</span>
-            <button onClick={() => removeService(s.id)} className="text-red-600 text-xs underline shrink-0 ml-2">
+          <div key={s.id} className="border rounded-xl p-3 flex justify-between items-center gap-2 text-sm">
+            <span className="min-w-0">{s.name} · {s.duration_minutes} min · {s.price} ₸</span>
+            <button onClick={() => removeService(s.id)} className="text-red-600 text-xs underline shrink-0">
               Remove
             </button>
           </div>
@@ -306,7 +306,7 @@ export default function DashboardPage() {
           placeholder="Service name"
           value={newServiceName}
           onChange={(e) => setNewServiceName(e.target.value)}
-          className="border rounded-lg p-2 w-full text-sm"
+          className="border rounded-lg p-2 w-full text-base"
         />
         <div className="flex gap-2">
           <input
@@ -314,14 +314,14 @@ export default function DashboardPage() {
             type="number"
             value={newServicePrice}
             onChange={(e) => setNewServicePrice(e.target.value)}
-            className="border rounded-lg p-2 w-full text-sm"
+            className="border rounded-lg p-2 w-full text-base"
           />
           <input
             placeholder="Minutes"
             type="number"
             value={newServiceDuration}
             onChange={(e) => setNewServiceDuration(e.target.value)}
-            className="border rounded-lg p-2 w-full text-sm"
+            className="border rounded-lg p-2 w-full text-base"
           />
         </div>
         <button type="submit" className="w-full bg-black text-white rounded-lg py-2 text-sm">
