@@ -60,7 +60,10 @@ function FinishSetup({ userId, onDone }) {
     const { shop, error: shopError } = await createShopForOwner({ name: shopName, category });
     setLoading(false);
     if (shopError) {
-      setError('Could not save your shop: ' + shopError.message);
+      // Our SECURITY DEFINER functions raise 'code: human text' -- show
+      // just the readable part, not our internal error label.
+      const readable = shopError.message.match(/^[a-z_]+: (.+)$/)?.[1] || shopError.message;
+      setError('Could not save your shop: ' + readable);
       return;
     }
     onDone(shop);
@@ -214,17 +217,21 @@ export default function DashboardPage() {
   }
 
   const [repairingHours, setRepairingHours] = useState(false);
+  const [repairError, setRepairError] = useState('');
 
   // Recovery path for a shop that ended up with zero hours rows -- possible
   // for any shop created before create_shop_with_defaults() existed. Every
   // day would otherwise show as permanently closed with no way to fix it.
   async function repairMissingHours() {
     setRepairingHours(true);
+    setRepairError('');
     const { data, error } = await supabase.rpc('add_default_hours_if_missing', { p_shop_id: shop.id });
     setRepairingHours(false);
-    if (!error && data) {
-      setHours(data);
+    if (error) {
+      setRepairError('Could not set up hours — try again in a moment.');
+      return;
     }
+    if (data) setHours(data);
   }
 
   async function addBlockedDate() {
@@ -343,6 +350,7 @@ export default function DashboardPage() {
           >
             {repairingHours ? 'Setting up…' : 'Set up default hours'}
           </button>
+          {repairError && <p className="text-red-600 text-xs mt-2">{repairError}</p>}
         </div>
       ) : (
       <div className="border rounded-xl divide-y mb-6">
