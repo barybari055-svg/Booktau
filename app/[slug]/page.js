@@ -189,7 +189,7 @@ export default function BookingPage() {
                 <button
                   key={t}
                   onClick={() => { setTime(t); setStep(4); }}
-                  className="border rounded-lg py-2.5 font-mono text-sm"
+                  className="border rounded-lg py-3 font-mono text-sm"
                 >
                   {t}
                 </button>
