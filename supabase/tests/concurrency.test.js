@@ -20,14 +20,14 @@ const CONN = {
 const SHOP_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
 const SERVICE_ID = 'c1c1c1c1-c1c1-c1c1-c1c1-c1c1c1c1c1c1';
 
-async function attemptBooking(time, customerName) {
+async function attemptBooking(time, customerName, phone) {
   const client = new Client(CONN);
   await client.connect();
   await client.query('set role anon');
   try {
     const res = await client.query(
       `select (create_booking($1,$2,$3,$4,$5,$6)).booking_time as booked_time`,
-      [SHOP_ID, SERVICE_ID, '2026-09-07', time, customerName, '+77001110000']
+      [SHOP_ID, SERVICE_ID, '2026-09-07', time, customerName, phone]
     );
     return { ok: true, row: res.rows[0] };
   } catch (err) {
@@ -37,10 +37,20 @@ async function attemptBooking(time, customerName) {
   }
 }
 
-async function runRound(time) {
+async function runRound(time, roundIndex) {
+  // Distinct phone number per attempt, always. create_booking() also
+  // enforces a real "5 bookings per phone per 10 minutes" rate limit --
+  // a good thing, but this test fires many rapid bookings in a short
+  // window, and reusing one phone number across rounds would eventually
+  // trip that limit and reject a request for a completely unrelated
+  // reason (rate_limited, not slot_taken), which isn't what this test
+  // is trying to measure at all.
+  const phoneA = `+7700111${String(roundIndex * 2).padStart(4, '0')}`;
+  const phoneB = `+7700111${String(roundIndex * 2 + 1).padStart(4, '0')}`;
+
   const [a, b] = await Promise.all([
-    attemptBooking(time, 'Customer A'),
-    attemptBooking(time, 'Customer B'),
+    attemptBooking(time, 'Customer A', phoneA),
+    attemptBooking(time, 'Customer B', phoneB),
   ]);
   const successes = [a, b].filter((r) => r.ok);
   const slotTakenFailures = [a, b].filter((r) => !r.ok && r.message.includes('slot_taken'));
@@ -56,7 +66,7 @@ async function runRound(time) {
 async function main() {
   const times = ['13:00', '13:30', '14:00', '14:30', '15:00'];
   const results = [];
-  for (const t of times) results.push(await runRound(t));
+  for (let i = 0; i < times.length; i++) results.push(await runRound(times[i], i));
 
   // Dedicated BYPASSRLS role (created by run.sh) so this check sees every
   // row regardless of ownership -- confirming the real, unfiltered state.
