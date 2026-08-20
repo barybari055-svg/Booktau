@@ -192,12 +192,14 @@ export default function DashboardPage() {
   }
 
   async function removeService(id) {
-    await supabase.from('services').delete().eq('id', id);
+    const { error } = await supabase.from('services').delete().eq('id', id);
+    if (error) return;
     setServices((prev) => prev.filter((s) => s.id !== id));
   }
 
   async function cancelBooking(id) {
-    await supabase.from('bookings').delete().eq('id', id);
+    const { error } = await supabase.from('bookings').delete().eq('id', id);
+    if (error) return;
     setBookings((prev) => prev.filter((b) => b.id !== id));
   }
 
@@ -239,7 +241,8 @@ export default function DashboardPage() {
   }
 
   async function removeBlockedDate(id) {
-    await supabase.from('blocked_dates').delete().eq('id', id);
+    const { error } = await supabase.from('blocked_dates').delete().eq('id', id);
+    if (error) return;
     setBlockedDates((prev) => prev.filter((b) => b.id !== id));
   }
 
