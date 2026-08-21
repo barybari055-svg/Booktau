@@ -30,6 +30,20 @@ export default function SignupPage() {
       return;
     }
 
+    // Supabase deliberately does NOT return an error for an email that's
+    // already registered (with "Confirm email" on, which is the default) --
+    // it returns a fake-looking success response instead, to stop attackers
+    // probing which emails exist. Without this check, that person would see
+    // "Check your email" and wait forever for a confirmation link that's
+    // never actually sent. identities staying empty is the one reliable
+    // way to tell a real new signup from this obfuscated one -- documented
+    // Supabase behavior, not a guess.
+    if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+      setError('An account with this email already exists. Try logging in, or use "Forgot password" if you need to reset it.');
+      setLoading(false);
+      return;
+    }
+
     if (!authData.session) {
       // Supabase project has "confirm email" on — no active session until they click the link.
       // Their account exists but has no shop yet; logging in after confirming will
