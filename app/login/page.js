@@ -17,13 +17,18 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (signInError) {
-      setError(signInError.message);
-      return;
+    try {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setError(signInError.message);
+        return;
+      }
+      router.push('/dashboard');
+    } catch {
+      setError('Something went wrong — check your connection and try again.');
+    } finally {
+      setLoading(false);
     }
-    router.push('/dashboard');
   }
 
   return (

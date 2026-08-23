@@ -23,47 +23,48 @@ export default function SignupPage() {
     setError('');
     setLoading(true);
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
-    if (authError) {
-      setError(authError.message);
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
+      if (authError) {
+        setError(authError.message);
+        return;
+      }
+
+      // Supabase deliberately does NOT return an error for an email that's
+      // already registered (with "Confirm email" on, which is the default) --
+      // it returns a fake-looking success response instead, to stop attackers
+      // probing which emails exist. Without this check, that person would see
+      // "Check your email" and wait forever for a confirmation link that's
+      // never actually sent. identities staying empty is the one reliable
+      // way to tell a real new signup from this obfuscated one -- documented
+      // Supabase behavior, not a guess.
+      if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+        setError('An account with this email already exists. Try logging in, or use "Forgot password" if you need to reset it.');
+        return;
+      }
+
+      if (!authData.session) {
+        // Supabase project has "confirm email" on — no active session until they click the link.
+        // Their account exists but has no shop yet; logging in after confirming will
+        // land them on the dashboard's own "finish setting up" step.
+        setNeedsConfirm(true);
+        return;
+      }
+
+      const { error: shopError } = await createShopForOwner({ name: shopName, category });
+      if (shopError) {
+        // Their account exists either way — send them to log in, where the dashboard
+        // will offer to finish shop setup instead of a dead end.
+        setError('Account created, but the shop didn\u2019t save. Log in and you can finish setting it up there.');
+        return;
+      }
+
+      router.push('/dashboard');
+    } catch {
+      setError('Something went wrong — check your connection and try again.');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Supabase deliberately does NOT return an error for an email that's
-    // already registered (with "Confirm email" on, which is the default) --
-    // it returns a fake-looking success response instead, to stop attackers
-    // probing which emails exist. Without this check, that person would see
-    // "Check your email" and wait forever for a confirmation link that's
-    // never actually sent. identities staying empty is the one reliable
-    // way to tell a real new signup from this obfuscated one -- documented
-    // Supabase behavior, not a guess.
-    if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
-      setError('An account with this email already exists. Try logging in, or use "Forgot password" if you need to reset it.');
-      setLoading(false);
-      return;
-    }
-
-    if (!authData.session) {
-      // Supabase project has "confirm email" on — no active session until they click the link.
-      // Their account exists but has no shop yet; logging in after confirming will
-      // land them on the dashboard's own "finish setting up" step.
-      setNeedsConfirm(true);
-      setLoading(false);
-      return;
-    }
-
-    const { error: shopError } = await createShopForOwner({ name: shopName, category });
-    setLoading(false);
-
-    if (shopError) {
-      // Their account exists either way — send them to log in, where the dashboard
-      // will offer to finish shop setup instead of a dead end.
-      setError('Account created, but the shop didn\u2019t save. Log in and you can finish setting it up there.');
-      return;
-    }
-
-    router.push('/dashboard');
   }
 
   if (needsConfirm) {

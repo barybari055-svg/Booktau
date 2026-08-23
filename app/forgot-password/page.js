@@ -15,15 +15,20 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setLoading(false);
-    if (resetError) {
-      setError(resetError.message);
-      return;
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (resetError) {
+        setError(resetError.message);
+        return;
+      }
+      setSent(true);
+    } catch {
+      setError('Something went wrong — check your connection and try again.');
+    } finally {
+      setLoading(false);
     }
-    setSent(true);
   }
 
   if (sent) {

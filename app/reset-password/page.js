@@ -52,13 +52,18 @@ export default function ResetPasswordPage() {
       return;
     }
     setLoading(true);
-    const { error: updateError } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-    if (updateError) {
-      setError(updateError.message);
-      return;
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) {
+        setError(updateError.message);
+        return;
+      }
+      router.push('/dashboard');
+    } catch {
+      setError('Something went wrong — check your connection and try again.');
+    } finally {
+      setLoading(false);
     }
-    router.push('/dashboard');
   }
 
   if (checking) {
