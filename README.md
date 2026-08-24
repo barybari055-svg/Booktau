@@ -192,18 +192,20 @@ Supabase project.
 
 ## Suggested next steps, roughly in order
 
-1. Resolve the data residency question above with real legal counsel — this
-   affects the database choice itself, so it's worth settling before much more
-   gets built on top of the current setup.
-2. Port the visual design from the chat demo — the logic underneath is identical,
-   so this is styling work, not rebuilding.
-3. Add the WhatsApp confirmation for real, once you have API access.
-4. Bring back language switching (English/Russian/Kazakh) — same translation
-   strings as the demo, just wired to a real settings table instead of local
-   state. Worth noting: Kazakhstan's digital business rules require services to
-   be available in Kazakh and Russian, not just as a nice-to-have.
-5. Add phone verification (SMS/WhatsApp OTP) before letting anyone look up or
-   cancel a booking by phone number.
-# Booktau
-# Booktau
-# Booktau
+For the next month, the goal is making this presentable for a college application,
+not continuing toward a commercial launch — these next steps reflect that.
+
+1. Get a real deployment live (Vercel + a real Supabase project) — the rest of
+   this list benefits from having something real to point to.
+2. Rewrite this README as the actual story: the real problem, and 2–3 of the
+   genuine technical challenges solved along the way, not just a feature list.
+3. A visual polish pass — the logic is solid, the styling is still default
+   Tailwind. Porting the design from the original chat demo is the fastest
+   path, since the underlying logic is identical.
+4. If realistic, get one real shop owner to actually try it — a real user is
+   a stronger story than any amount of additional polish.
+
+Deliberately not on this list right now, though genuinely important for an
+eventual real launch: the Kazakhstan data residency legal question, WhatsApp/SMS
+confirmations, and deep localization. See `docs/DECISIONS.md` for the reasoning
+already recorded on the data residency question specifically.
