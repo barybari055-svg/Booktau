@@ -70,10 +70,10 @@ export default function SignupPage() {
   if (needsConfirm) {
     return (
       <div className="max-w-md mx-auto p-6 text-center">
-        <h1 className="text-xl font-bold mb-2">Check your email</h1>
-        <p className="text-gray-600">
+        <h1 className="font-display text-xl font-bold mb-2">Check your email</h1>
+        <p className="text-ink-soft">
           We sent a confirmation link to {email}. Click it, then{' '}
-          <a href="/login" className="underline">log in</a> to finish setting up your shop.
+          <a href="/login" className="underline text-brass-dark">log in</a> to finish setting up your shop.
         </p>
       </div>
     );
@@ -81,8 +81,8 @@ export default function SignupPage() {
 
   return (
     <div className="max-w-md mx-auto p-6">
-      <h1 className="text-xl font-bold mb-1">Create your shop</h1>
-      <p className="text-gray-500 mb-6">Takes about 2 minutes.</p>
+      <h1 className="font-display text-xl font-bold mb-1">Create your shop</h1>
+      <p className="text-ink-soft mb-6">Takes about 2 minutes.</p>
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           type="email"
@@ -90,7 +90,7 @@ export default function SignupPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="border rounded-lg p-3 w-full text-base"
+          className="border border-line rounded-lg p-3 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         />
         <input
           type="password"
@@ -99,7 +99,7 @@ export default function SignupPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          className="border rounded-lg p-3 w-full text-base"
+          className="border border-line rounded-lg p-3 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         />
         <input
           type="text"
@@ -107,12 +107,12 @@ export default function SignupPage() {
           value={shopName}
           onChange={(e) => setShopName(e.target.value)}
           required
-          className="border rounded-lg p-3 w-full text-base"
+          className="border border-line rounded-lg p-3 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         />
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="border rounded-lg p-3 w-full text-base"
+          className="border border-line rounded-lg p-3 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         >
           <option value="barbershop">Barbershop</option>
           <option value="beauty_salon">Beauty Salon</option>
@@ -122,13 +122,13 @@ export default function SignupPage() {
           <option value="photographer">Photographer</option>
           <option value="other">Other</option>
         </select>
-        <label className="flex items-start gap-2 text-xs text-gray-500">
+        <label className="flex items-start gap-2 text-xs text-ink-soft">
           <input
             type="checkbox"
             checked={consentGiven}
             onChange={(e) => setConsentGiven(e.target.checked)}
             required
-            className="mt-0.5"
+            className="mt-0.5 accent-brass"
           />
           <span>
             I agree to my account and shop data being stored to provide this
@@ -136,17 +136,17 @@ export default function SignupPage() {
             <a href="/privacy" target="_blank" className="underline">Privacy Policy</a>.
           </span>
         </label>
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-rust text-sm">{error}</p>}
         <button
           type="submit"
           disabled={loading || !consentGiven}
-          className="w-full bg-black text-white rounded-lg py-3 disabled:opacity-30"
+          className="w-full bg-ink text-paper rounded-xl py-3 font-medium hover:bg-brass-dark transition-colors disabled:opacity-30 disabled:hover:bg-ink"
         >
           {loading ? 'Creating…' : 'Create shop'}
         </button>
       </form>
-      <p className="text-sm text-gray-500 mt-4 text-center">
-        Already have a shop? <a href="/login" className="underline">Log in</a>
+      <p className="text-sm text-ink-soft mt-4 text-center">
+        Already have a shop? <a href="/login" className="underline text-brass-dark">Log in</a>
       </p>
     </div>
   );
