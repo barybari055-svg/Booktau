@@ -15,15 +15,15 @@ export default function GlobalError({ error, reset }) {
 
   return (
     <html lang="en">
-      <body>
+      <body className="bg-paper text-ink">
         <div className="max-w-md mx-auto p-6 text-center">
           <h1 className="text-xl font-bold mb-2">Something went wrong</h1>
-          <p className="text-gray-500 text-sm mb-6">
+          <p className="text-ink-soft text-sm mb-6">
             That's on us, not something you did. Try refreshing the page.
           </p>
           <button
             onClick={() => reset()}
-            className="bg-black text-white rounded-lg px-4 py-2 text-sm"
+            className="bg-ink text-paper rounded-lg px-4 py-2 text-sm font-medium"
           >
             Try again
           </button>

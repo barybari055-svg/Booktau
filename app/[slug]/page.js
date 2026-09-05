@@ -99,12 +99,12 @@ export default function BookingPage() {
   }
 
   if (loading) {
-    return <div className="max-w-md mx-auto p-6 text-center text-gray-500">Loading…</div>;
+    return <div className="max-w-md mx-auto p-6 text-center text-ink-soft">Loading…</div>;
   }
 
   if (notFound) {
     return (
-      <div className="max-w-md mx-auto p-6 text-center text-gray-500">
+      <div className="max-w-md mx-auto p-6 text-center text-ink-soft">
         This shop doesn&apos;t exist yet.
       </div>
     );
@@ -112,14 +112,32 @@ export default function BookingPage() {
 
   if (confirmed) {
     return (
-      <div className="max-w-md mx-auto p-6 text-center">
-        <h1 className="text-xl font-bold mb-2">Booked!</h1>
-        <p className="text-gray-600 mb-4">{shop.name} will be expecting you.</p>
-        <div className="border rounded-xl p-4 text-left text-sm space-y-1">
-          <p><span className="text-gray-500">Service:</span> {confirmed.service_name}</p>
-          <p><span className="text-gray-500">Date:</span> {confirmed.booking_date}</p>
-          <p><span className="text-gray-500">Time:</span> {confirmed.booking_time}</p>
-          <p><span className="text-gray-500">Price:</span> {confirmed.price} ₸</p>
+      <div className="max-w-md mx-auto min-h-screen flex flex-col justify-center p-6 text-center">
+        <div className="w-12 h-12 rounded-full bg-moss/10 border border-moss/30 flex items-center justify-center mx-auto mb-4">
+          <span className="text-moss text-xl">✓</span>
+        </div>
+        <h1 className="font-display text-2xl font-bold mb-1">Booked</h1>
+        <p className="text-ink-soft mb-6">{shop.name} will be expecting you.</p>
+        <div className="border border-line rounded-2xl p-5 text-left bg-paper-dim">
+          <div className="space-y-2.5 font-mono text-sm">
+            <div className="flex justify-between gap-2">
+              <span className="text-ink-soft font-sans">Service</span>
+              <span className="text-right">{confirmed.service_name}</span>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span className="text-ink-soft font-sans">Date</span>
+              <span>{confirmed.booking_date}</span>
+            </div>
+            <div className="flex justify-between gap-2">
+              <span className="text-ink-soft font-sans">Time</span>
+              <span>{confirmed.booking_time}</span>
+            </div>
+            <div className="border-t border-dashed border-line my-2" />
+            <div className="flex justify-between gap-2 font-medium">
+              <span className="text-ink-soft font-sans">Price</span>
+              <span>{confirmed.price} ₸</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -127,11 +145,17 @@ export default function BookingPage() {
 
   return (
     <div className="max-w-md mx-auto p-6">
-      <h1 className="text-xl font-bold mb-1">{shop.name}</h1>
-      <p className="text-gray-500 mb-6 capitalize">{shop.category.replace('_', ' ')}</p>
+      <h1 className="font-display text-xl font-bold mb-1">{shop.name}</h1>
+      <p className="text-ink-soft mb-6 capitalize text-sm">{shop.category.replace('_', ' ')}</p>
+
+      <div className="flex gap-1.5 mb-6">
+        {[1, 2, 3, 4].map((n) => (
+          <div key={n} className={`h-1 flex-1 rounded-full ${n <= step ? 'bg-brass' : 'bg-line'}`} />
+        ))}
+      </div>
 
       {step > 1 && (
-        <button onClick={() => setStep(step - 1)} className="text-sm text-gray-500 mb-4">
+        <button onClick={() => setStep(step - 1)} className="text-sm text-ink-soft mb-4 hover:text-ink transition-colors">
           ← Back
         </button>
       )}
@@ -139,19 +163,19 @@ export default function BookingPage() {
       {step === 1 && (
         <div>
           <h2 className="font-semibold mb-3">Choose a service</h2>
-          {services.length === 0 && <p className="text-gray-500 text-sm">No services listed yet.</p>}
+          {services.length === 0 && <p className="text-ink-soft text-sm">No services listed yet.</p>}
           <div className="space-y-2">
             {services.map((s) => (
               <button
                 key={s.id}
                 onClick={() => { setServiceId(s.id); setStep(2); }}
-                className="w-full border rounded-xl p-3 text-left flex justify-between items-center"
+                className="w-full border border-line rounded-xl p-3 text-left flex justify-between items-center hover:border-brass transition-colors"
               >
                 <span>
                   {s.name}
-                  <span className="text-gray-500 text-sm"> · {s.duration_minutes} min</span>
+                  <span className="text-ink-soft text-sm"> · {s.duration_minutes} min</span>
                 </span>
-                <span className="font-medium">{s.price} ₸</span>
+                <span className="font-mono font-medium text-brass-dark">{s.price} ₸</span>
               </button>
             ))}
           </div>
@@ -166,12 +190,12 @@ export default function BookingPage() {
             value={date}
             min={localDateStr(new Date())}
             onChange={(e) => setDate(e.target.value)}
-            className="border rounded-lg p-3 w-full mb-4 text-base"
+            className="border border-line rounded-lg p-3 w-full mb-4 text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
           />
           <button
             disabled={!date}
             onClick={() => setStep(3)}
-            className="w-full bg-black text-white rounded-lg py-3 disabled:opacity-30"
+            className="w-full bg-ink text-paper rounded-xl py-3 font-medium hover:bg-brass-dark transition-colors disabled:opacity-30 disabled:hover:bg-ink"
           >
             Continue
           </button>
@@ -182,14 +206,14 @@ export default function BookingPage() {
         <div>
           <h2 className="font-semibold mb-3">Pick a time</h2>
           {availableSlots.length === 0 ? (
-            <p className="text-gray-500 text-sm">No times left this day — go back and try another date.</p>
+            <p className="text-ink-soft text-sm">No times left this day — go back and try another date.</p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {availableSlots.map((t) => (
                 <button
                   key={t}
                   onClick={() => { setTime(t); setStep(4); }}
-                  className="border rounded-lg py-3 font-mono text-sm"
+                  className="border border-line rounded-lg py-3 font-mono text-sm hover:border-brass hover:bg-brass/5 transition-colors"
                 >
                   {t}
                 </button>
@@ -202,12 +226,12 @@ export default function BookingPage() {
       {step === 4 && (
         <div>
           <h2 className="font-semibold mb-3">Your details</h2>
-          <p className="text-gray-500 text-sm mb-4">{service?.name} · {date} · {time}</p>
+          <p className="text-ink-soft text-sm mb-4">{service?.name} · {date} · {time}</p>
           <input
             placeholder="Your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="border rounded-lg p-3 w-full mb-2 text-base"
+            className="border border-line rounded-lg p-3 w-full mb-2 text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
             autoComplete="name"
           />
           <input
@@ -217,14 +241,14 @@ export default function BookingPage() {
             type="tel"
             inputMode="tel"
             autoComplete="tel"
-            className="border rounded-lg p-3 w-full mb-4 text-base font-mono"
+            className="border border-line rounded-lg p-3 w-full mb-4 text-base font-mono bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
           />
-          <label className="flex items-start gap-2 text-xs text-gray-500 mb-4">
+          <label className="flex items-start gap-2 text-xs text-ink-soft mb-4">
             <input
               type="checkbox"
               checked={consentGiven}
               onChange={(e) => setConsentGiven(e.target.checked)}
-              className="mt-0.5"
+              className="mt-0.5 accent-brass"
             />
             <span>
               I agree to my name, phone number, and booking details being stored
@@ -232,11 +256,11 @@ export default function BookingPage() {
               <a href="/privacy" target="_blank" className="underline">Privacy Policy</a>.
             </span>
           </label>
-          {submitError && <p className="text-red-600 text-sm mb-2">{submitError}</p>}
+          {submitError && <p className="text-rust text-sm mb-2">{submitError}</p>}
           <button
             disabled={!name.trim() || phone.trim().length < 6 || !consentGiven || submitting}
             onClick={handleConfirm}
-            className="w-full bg-black text-white rounded-lg py-3 disabled:opacity-30"
+            className="w-full bg-ink text-paper rounded-xl py-3 font-medium hover:bg-brass-dark transition-colors disabled:opacity-30 disabled:hover:bg-ink"
           >
             {submitting ? 'Booking…' : 'Confirm booking'}
           </button>

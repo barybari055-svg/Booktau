@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   return (
     <div className="max-w-md mx-auto p-6">
-      <h1 className="text-xl font-bold mb-6">Log in</h1>
+      <h1 className="font-display text-xl font-bold mb-6">Log in</h1>
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           type="email"
@@ -41,7 +41,7 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="border rounded-lg p-3 w-full text-base"
+          className="border border-line rounded-lg p-3 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         />
         <input
           type="password"
@@ -49,22 +49,22 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="border rounded-lg p-3 w-full text-base"
+          className="border border-line rounded-lg p-3 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         />
         <p className="text-right">
-          <a href="/forgot-password" className="text-sm text-gray-500 underline">Forgot password?</a>
+          <a href="/forgot-password" className="text-sm text-ink-soft underline">Forgot password?</a>
         </p>
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-rust text-sm">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black text-white rounded-lg py-3 disabled:opacity-30"
+          className="w-full bg-ink text-paper rounded-xl py-3 font-medium hover:bg-brass-dark transition-colors disabled:opacity-30 disabled:hover:bg-ink"
         >
           {loading ? 'Logging in…' : 'Log in'}
         </button>
       </form>
-      <p className="text-sm text-gray-500 mt-4 text-center">
-        No shop yet? <a href="/signup" className="underline">Create one</a>
+      <p className="text-sm text-ink-soft mt-4 text-center">
+        No shop yet? <a href="/signup" className="underline text-brass-dark">Create one</a>
       </p>
     </div>
   );
