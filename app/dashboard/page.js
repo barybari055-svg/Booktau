@@ -14,11 +14,11 @@ const DAY_LABELS = { mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri',
 function BookingRow({ booking, onCancel }) {
   const [confirming, setConfirming] = useState(false);
   return (
-    <div className="border rounded-xl p-3 text-sm">
+    <div className="border border-line rounded-xl p-3 text-sm">
       <div className="flex justify-between gap-2">
         <div className="min-w-0">
           <p className="font-medium">{booking.customer_name}</p>
-          <p className="text-gray-500">{booking.service_name} · {booking.customer_phone}</p>
+          <p className="text-ink-soft">{booking.service_name} · {booking.customer_phone}</p>
         </div>
         <div className="text-right font-mono shrink-0">
           <p>{booking.booking_date}</p>
@@ -27,15 +27,15 @@ function BookingRow({ booking, onCancel }) {
       </div>
       {confirming ? (
         <div className="flex gap-2 mt-2">
-          <button onClick={onCancel} className="flex-1 bg-red-600 text-white rounded-lg py-1.5 text-xs font-medium">
+          <button onClick={onCancel} className="flex-1 bg-rust text-paper rounded-lg py-1.5 text-xs font-medium">
             Yes, cancel
           </button>
-          <button onClick={() => setConfirming(false)} className="flex-1 text-gray-500 text-xs">
+          <button onClick={() => setConfirming(false)} className="flex-1 text-ink-soft text-xs">
             Keep it
           </button>
         </div>
       ) : (
-        <button onClick={() => setConfirming(true)} className="text-red-600 text-xs underline mt-2">
+        <button onClick={() => setConfirming(true)} className="text-rust text-xs underline mt-2">
           Cancel booking
         </button>
       )}
@@ -71,8 +71,8 @@ function FinishSetup({ userId, onDone }) {
 
   return (
     <div className="max-w-md mx-auto p-6">
-      <h1 className="text-xl font-bold mb-1">Finish setting up</h1>
-      <p className="text-gray-500 mb-6">Your account exists — just needs a shop attached to it.</p>
+      <h1 className="font-display text-xl font-bold mb-1">Finish setting up</h1>
+      <p className="text-ink-soft mb-6">Your account exists — just needs a shop attached to it.</p>
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
           type="text"
@@ -80,12 +80,12 @@ function FinishSetup({ userId, onDone }) {
           value={shopName}
           onChange={(e) => setShopName(e.target.value)}
           required
-          className="border rounded-lg p-3 w-full text-base"
+          className="border border-line rounded-lg p-3 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         />
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="border rounded-lg p-3 w-full text-base"
+          className="border border-line rounded-lg p-3 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         >
           <option value="barbershop">Barbershop</option>
           <option value="beauty_salon">Beauty Salon</option>
@@ -95,11 +95,11 @@ function FinishSetup({ userId, onDone }) {
           <option value="photographer">Photographer</option>
           <option value="other">Other</option>
         </select>
-        {error && <p className="text-red-600 text-sm">{error}</p>}
+        {error && <p className="text-rust text-sm">{error}</p>}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-black text-white rounded-lg py-3 disabled:opacity-30"
+          className="w-full bg-ink text-paper rounded-xl py-3 font-medium hover:bg-brass-dark transition-colors disabled:opacity-30 disabled:hover:bg-ink"
         >
           {loading ? 'Creating…' : 'Create shop'}
         </button>
@@ -259,7 +259,7 @@ export default function DashboardPage() {
   }
 
   if (loading) {
-    return <div className="max-w-md mx-auto p-6 text-center text-gray-500">Loading…</div>;
+    return <div className="max-w-md mx-auto p-6 text-center text-ink-soft">Loading…</div>;
   }
 
   if (needsSetup) {
@@ -273,22 +273,22 @@ export default function DashboardPage() {
     <div className="max-w-md mx-auto p-6 pb-16">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-xl font-bold">{shop.name}</h1>
-          <p className="text-gray-500 text-sm capitalize">{shop.category.replace('_', ' ')}</p>
+          <h1 className="font-display text-xl font-bold">{shop.name}</h1>
+          <p className="text-ink-soft text-sm capitalize">{shop.category.replace('_', ' ')}</p>
         </div>
-        <button onClick={handleSignOut} className="text-sm text-gray-500 underline">
+        <button onClick={handleSignOut} className="text-sm text-ink-soft underline hover:text-ink transition-colors">
           Sign out
         </button>
       </div>
 
-      <div className="bg-gray-50 border rounded-xl p-3 mb-6">
-        <p className="text-sm text-gray-500 mb-1">Your booking link</p>
-        <p className="font-mono text-sm break-all">{origin}/{shop.slug}</p>
+      <div className="bg-paper-dim border border-line rounded-xl p-3 mb-6">
+        <p className="text-sm text-ink-soft mb-1">Your booking link</p>
+        <p className="font-mono text-sm break-all text-brass-dark">{origin}/{shop.slug}</p>
       </div>
 
-      <h2 className="font-semibold mb-3">Upcoming bookings</h2>
+      <h2 className="font-display font-semibold mb-3">Upcoming bookings</h2>
       {upcoming.length === 0 ? (
-        <p className="text-gray-500 text-sm mb-6">No bookings yet.</p>
+        <p className="text-ink-soft text-sm mb-6">No bookings yet.</p>
       ) : (
         <div className="space-y-2 mb-6">
           {upcoming.map((b) => (
@@ -297,23 +297,23 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <h2 className="font-semibold mb-3">Services</h2>
+      <h2 className="font-display font-semibold mb-3">Services</h2>
       <div className="space-y-2 mb-3">
         {services.map((s) => (
-          <div key={s.id} className="border rounded-xl p-3 flex justify-between items-center gap-2 text-sm">
-            <span className="min-w-0">{s.name} · {s.duration_minutes} min · {s.price} ₸</span>
-            <button onClick={() => removeService(s.id)} className="text-red-600 text-xs underline shrink-0">
+          <div key={s.id} className="border border-line rounded-xl p-3 flex justify-between items-center gap-2 text-sm">
+            <span className="min-w-0">{s.name} · {s.duration_minutes} min · <span className="font-mono text-brass-dark">{s.price} ₸</span></span>
+            <button onClick={() => removeService(s.id)} className="text-rust text-xs underline shrink-0">
               Remove
             </button>
           </div>
         ))}
       </div>
-      <form onSubmit={addService} className="border rounded-xl p-3 space-y-2 mb-6">
+      <form onSubmit={addService} className="border border-line rounded-xl p-3 space-y-2 mb-6">
         <input
           placeholder="Service name"
           value={newServiceName}
           onChange={(e) => setNewServiceName(e.target.value)}
-          className="border rounded-lg p-2 w-full text-base"
+          className="border border-line rounded-lg p-2 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         />
         <div className="flex gap-2">
           <input
@@ -321,39 +321,39 @@ export default function DashboardPage() {
             type="number"
             value={newServicePrice}
             onChange={(e) => setNewServicePrice(e.target.value)}
-            className="border rounded-lg p-2 w-full text-base"
+            className="border border-line rounded-lg p-2 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
           />
           <input
             placeholder="Minutes"
             type="number"
             value={newServiceDuration}
             onChange={(e) => setNewServiceDuration(e.target.value)}
-            className="border rounded-lg p-2 w-full text-base"
+            className="border border-line rounded-lg p-2 w-full text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
           />
         </div>
-        <button type="submit" className="w-full bg-black text-white rounded-lg py-2 text-sm">
+        <button type="submit" className="w-full bg-ink text-paper rounded-lg py-2 text-sm font-medium hover:bg-brass-dark transition-colors">
           Add service
         </button>
       </form>
 
-      <h2 className="font-semibold mb-3">Working hours</h2>
+      <h2 className="font-display font-semibold mb-3">Working hours</h2>
       {hours.length === 0 ? (
-        <div className="border rounded-xl p-4 mb-6 text-sm">
-          <p className="text-gray-500 mb-3">
+        <div className="border border-line rounded-xl p-4 mb-6 text-sm">
+          <p className="text-ink-soft mb-3">
             Working hours aren't set up yet, so every day currently shows as closed
             to customers.
           </p>
           <button
             onClick={repairMissingHours}
             disabled={repairingHours}
-            className="bg-black text-white rounded-lg px-4 py-2 text-sm disabled:opacity-30"
+            className="bg-ink text-paper rounded-lg px-4 py-2 text-sm font-medium hover:bg-brass-dark transition-colors disabled:opacity-30"
           >
             {repairingHours ? 'Setting up…' : 'Set up default hours'}
           </button>
-          {repairError && <p className="text-red-600 text-xs mt-2">{repairError}</p>}
+          {repairError && <p className="text-rust text-xs mt-2">{repairError}</p>}
         </div>
       ) : (
-      <div className="border rounded-xl divide-y mb-6">
+      <div className="border border-line rounded-xl divide-y divide-line mb-6">
         {DAY_KEYS.map((dayKey) => {
           const h = hours.find((x) => x.day_key === dayKey);
           if (!h) return null;
@@ -364,7 +364,7 @@ export default function DashboardPage() {
                 <button
                   onClick={() => updateHour(dayKey, { closed: !h.closed })}
                   className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                    h.closed ? 'bg-gray-200 text-gray-500' : 'bg-green-100 text-green-700'
+                    h.closed ? 'bg-paper-dim text-ink-soft' : 'bg-moss/10 text-moss'
                   }`}
                 >
                   {h.closed ? 'Closed' : 'Open'}
@@ -377,17 +377,17 @@ export default function DashboardPage() {
                       type="time"
                       value={h.open_time || ''}
                       onChange={(e) => updateHour(dayKey, { open_time: e.target.value })}
-                      className="border rounded-lg p-2 flex-1 min-w-0 text-base"
+                      className="border border-line rounded-lg p-2 flex-1 min-w-0 text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
                     />
-                    <span className="text-gray-400">–</span>
+                    <span className="text-ink-soft">–</span>
                     <input
                       type="time"
                       value={h.close_time || ''}
                       onChange={(e) => updateHour(dayKey, { close_time: e.target.value })}
-                      className="border rounded-lg p-2 flex-1 min-w-0 text-base"
+                      className="border border-line rounded-lg p-2 flex-1 min-w-0 text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
                     />
                   </div>
-                  <label className="flex items-center gap-2 text-xs text-gray-500">
+                  <label className="flex items-center gap-2 text-xs text-ink-soft">
                     <input
                       type="checkbox"
                       checked={!!h.lunch_start}
@@ -399,6 +399,7 @@ export default function DashboardPage() {
                             : { lunch_start: null, lunch_end: null }
                         )
                       }
+                      className="accent-brass"
                     />
                     Lunch break{h.lunch_start ? ` · ${h.lunch_start}–${h.lunch_end}` : ''}
                   </label>
@@ -410,13 +411,13 @@ export default function DashboardPage() {
       </div>
       )}
 
-      <h2 className="font-semibold mb-3">Days off</h2>
+      <h2 className="font-display font-semibold mb-3">Days off</h2>
       <div className="space-y-2 mb-3">
-        {blockedDates.length === 0 && <p className="text-gray-500 text-sm">No days blocked.</p>}
+        {blockedDates.length === 0 && <p className="text-ink-soft text-sm">No days blocked.</p>}
         {blockedDates.map((b) => (
-          <div key={b.id} className="border rounded-xl p-3 flex justify-between items-center text-sm">
+          <div key={b.id} className="border border-line rounded-xl p-3 flex justify-between items-center text-sm">
             <span className="font-mono">{b.date}</span>
-            <button onClick={() => removeBlockedDate(b.id)} className="text-red-600 text-xs underline">
+            <button onClick={() => removeBlockedDate(b.id)} className="text-rust text-xs underline">
               Remove
             </button>
           </div>
@@ -427,9 +428,9 @@ export default function DashboardPage() {
           type="date"
           value={newBlockedDate}
           onChange={(e) => setNewBlockedDate(e.target.value)}
-          className="border rounded-lg p-2 flex-1 min-w-0 text-base"
+          className="border border-line rounded-lg p-2 flex-1 min-w-0 text-base bg-paper focus:outline-none focus:ring-2 focus:ring-brass/40 focus:border-brass"
         />
-        <button onClick={addBlockedDate} className="bg-black text-white rounded-lg px-4 text-sm shrink-0">
+        <button onClick={addBlockedDate} className="bg-ink text-paper rounded-lg px-4 text-sm font-medium shrink-0 hover:bg-brass-dark transition-colors">
           Block
         </button>
       </div>
