@@ -18,8 +18,13 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  title: 'Booktau',
-  description: 'Book appointments without the WhatsApp back-and-forth',
+  title: {
+    default: 'Booktau — simpler appointment booking',
+    template: '%s | Booktau',
+  },
+  description:
+    'An early-stage appointment-booking prototype for independent barbershops and salons in Kazakhstan, exploring reliable scheduling and database-backed booking rules.',
+  applicationName: 'Booktau',
 };
 
 export default function RootLayout({ children }) {
