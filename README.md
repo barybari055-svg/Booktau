@@ -1,132 +1,79 @@
 # Booktau
 
-Small barbershops and salons in Kazakhstan mostly run booking through WhatsApp:
-"Is 3pm free?" "Let me check." "Actually someone just took that." Booktau exists
-to fix that specific, ordinary problem — a real booking page, with the rules a
-shop actually needs (working hours, lunch breaks, no double-booking) enforced
-for real, not just in a prototype.
+**Appointment booking for independent barbershops and salons in Kazakhstan.**
 
-I built this with Claude as a technical collaborator — Claude did most of the
-hands-on implementation, testing, and debugging; I directed it, made the actual
-product and architecture calls, and pushed back when something needed real
-verification instead of a confident claim. That process is described honestly
-below, not glossed over, because I think how it was built is part of the story.
+Booktau explores a simple idea: a small shop should be able to share one booking link instead of managing every appointment through a back-and-forth of messages. The project focuses on a deceptively difficult part of that experience: making sure the rules behind a booking remain correct when requests arrive at the same time.
 
-**Stack:** Next.js (App Router) + Supabase (Postgres, Auth), Tailwind. Security
-and booking-integrity logic lives in Postgres itself — Row Level Security
-policies and `SECURITY DEFINER` functions — not in application code, so it
-can't be bypassed by calling the database directly instead of going through
-the app.
+> **Project status:** working prototype; not yet validated with real shop customers. The Kazakhstan data-residency question, production deployment, and booking notifications remain open before a commercial launch.
 
-## Three real bugs, and how they were actually found
+## Why I built it
 
-Anyone can claim a project is "tested." Here's what that meant concretely.
+Many small service businesses coordinate appointments manually. That can mean repeated availability questions, inconsistent working hours, and conflicting reservations. I chose this problem because it is concrete, locally relevant, and technically richer than a static website: the product must handle time, permissions, invalid requests, and simultaneous bookings correctly.
 
-**A bug that made every error message lie.** `create_booking()` — the one
-function that decides whether a booking is allowed — had a subtle PL/pgSQL
-mistake: `raise exception 'slot_taken' using message = '...'` is invalid
-syntax, because the literal string already sets the error message, so the
-`using message =` clause tries to set it a second time. Postgres threw its
-own internal error instead of the intended one. The booking was still
-correctly rejected either way — but every specific reason (a slot just taken,
-a blocked date, a past time) got swallowed, so a real customer would see a
-generic "Something went wrong" no matter what actually happened, including
-for the single most common case: someone else just took that slot. This
-wasn't found by reading the code — it read fine. It was found by standing up
-a real local Postgres instance and actually running every rejection path
-against it, which is the only way this class of bug shows up.
+## What the prototype includes
 
-**Proving concurrency safety instead of assuming it.** The harder version of
-"no double-booking" isn't the easy case (one person books, then another tries
-the same slot) — it's two people clicking confirm at the *same instant*. I
-insisted on this being proven, not asserted: two genuinely simultaneous
-database connections, racing for the identical slot, checked at the database
-level afterward for whether more than one row ever existed. Five rounds, zero
-double-bookings, every time. The fix underneath is a Postgres advisory lock
-scoped to the shop and date, taken before the slot is checked — but the lock
-existing isn't the interesting part; proving it actually works under real
-concurrent load is.
+- Shop-owner sign-up and login, with a dashboard for shop details and working hours
+- A public booking flow at `/[slug]`
+- Services, working hours, lunch breaks, and blocked dates
+- PostgreSQL-backed booking validation and access controls
+- Automated availability and booking-error tests, plus a SQL integration suite
 
-**Proving atomicity by deliberately breaking it.** Shop creation used to be
-two separate inserts (the shop, then its default hours) with no check that
-the second one succeeded — a failure left a shop that looked created but
-would show every day as permanently closed, with no way to fix it from the
-dashboard. The fix bundles both into one database transaction. To confirm
-that actually works rather than just looking right, we forced a failure
-partway through the hours insert on purpose (a temporary trigger, removed
-right after) and confirmed the *entire* operation rolled back — no orphaned
-shop, no partial data. Then built a recovery path for any shop that already
-existed in that broken state before the fix.
+## Engineering focus
 
-## How the collaboration actually worked
+The most important design decision is to treat the database as the final authority for booking integrity, rather than relying only on checks in the browser.
 
-The direction, priorities, and real tradeoff calls were mine. Specific
-examples, not a vague claim: insisting from the start that nothing gets
-called "fixed" without being run against a real database, not just read;
-deciding to stay on Supabase now and defer a Kazakhstan-hosting migration
-until there's a real legal answer, once we'd confirmed the underlying schema
-is portable enough that deferring isn't a real cost; choosing to drop
-SMS/Twilio work once it wasn't essential to the actual goal; personally
-running the end-to-end smoke test against a real, live Supabase project
-myself and reporting back exactly what happened, since that's the one thing
-Claude structurally can't do from its own sandbox; redirecting the whole
-project's priorities when the goal shifted from a commercial launch to this
-application.
+- **Access control:** Row Level Security (RLS) policies limit what clients can read or change.
+- **Validated booking path:** PostgreSQL functions validate booking requests before writing them.
+- **Concurrency:** an advisory lock helps serialize competing requests for the same shop and date while the slot is checked and booked.
+- **Atomicity:** shop creation and its default hours are grouped so a partial failure does not leave inconsistent setup data.
+- **Failure-oriented testing:** the SQL suite is designed to exercise rejected requests, owner boundaries, simultaneous booking attempts, and rollback behavior.
 
-Claude wrote the majority of the actual code, designed the test suites, found
-the bugs above, and — genuinely worth including, not hiding — made real
-mistakes along the way and caught them: merged a pull request once without
-noticing its CI check had actually failed (a polling script checked whether
-a run had *finished*, not whether it had *passed*), caught it, and fixed the
-actual root cause rather than just re-running and hoping.
+The repository documents the reported test scenarios and implementation decisions in [the SQL test guide](supabase/tests/README.md) and [architecture decision log](docs/DECISIONS.md). Test claims refer to the scenarios documented there; they are not a claim of production-scale reliability.
 
-## What's honestly not done
+## How I used AI
 
-- **Visual polish.** The logic is solid; the styling is still close to
-  default Tailwind. A real design pass is next.
-- **The Kazakhstan data-residency legal question**, recorded in
-  `docs/DECISIONS.md` rather than resolved — Supabase has no Kazakhstan
-  region, and Kazakh law may require one for real customer data. Deliberately
-  deferred, not ignored, since the underlying schema is confirmed portable.
-- **Booking confirmations (SMS/WhatsApp) and deep localization** — both real
-  requirements for an eventual commercial launch, both correctly out of scope
-  for this specific goal right now.
+This is an AI-assisted project. Claude produced most of the hands-on implementation and test-suite code. My role was to set product priorities, direct architectural decisions, review trade-offs, and personally run an end-to-end smoke test against a live Supabase project. I am continuing to build the technical understanding needed to explain, evaluate, and independently modify the system.
 
-## Setup (about 15 minutes)
+I include this distinction because I want the repository to show both the product I am pursuing and the way I am learning to build software responsibly—not to imply that every line was written manually by me.
 
-1. Create a free project at **supabase.com**.
-2. In the Supabase dashboard's **SQL Editor**, paste in and run
-   `supabase/schema.sql` — creates every table, RLS policy, and the secure
-   booking functions in one pass.
-3. In **Settings → API**, copy the **Project URL** and **anon public key**
-   into a new `.env.local` (copy `.env.local.example` as a starting point).
-4. `npm install && npm run dev`, then open `localhost:3000` and create a real
-   shop through the actual sign-up flow.
+## Stack
 
-Before touching `create_booking()` or the RLS policies again: `npm run
-test:sql` (needs a local Postgres — see `supabase/tests/README.md`) runs the
-real rule suite, including the concurrency test, directly against
-`schema.sql`.
+- **Application:** Next.js App Router, React
+- **Data and authentication:** Supabase, PostgreSQL
+- **Styling:** Tailwind CSS
+- **Testing:** Node-based tests and SQL integration tests
+- **CI:** GitHub Actions
 
-## Deploying for real
+## Run locally
 
-1. Push to GitHub (already done here).
-2. Import into **Vercel** — zero config needed for a standard Next.js app.
-3. Add the same two environment variables in Vercel's project settings.
-4. Deploy. The free `.vercel.app` URL is genuinely fine to use as-is.
+1. Create a Supabase project.
+2. Run the SQL in `supabase/schema.sql` in the Supabase SQL Editor.
+3. Copy `.env.local.example` to `.env.local` and add your Supabase project URL and anon key.
+4. Install dependencies and start the app:
 
-## Next steps, roughly in order
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-The current goal is making this presentable for a college application, not
-continuing toward a commercial launch — this list reflects that, not the
-longer-term commercial roadmap.
+5. Open `http://localhost:3000`.
 
-1. Get a real deployment live — everything else benefits from having
-   something real to point to.
-2. A visual polish pass.
-3. If realistic, get one real shop owner to actually try it — a real user is
-   a stronger story than any amount of additional polish.
+Run the JavaScript tests with `npm test`. The SQL integration suite is run with `npm run test:sql`; see [its setup guide](supabase/tests/README.md) for the local PostgreSQL requirement. Use a disposable local database for the SQL tests, not a production database.
 
-Deliberately not on this list right now, though genuinely important for an
-eventual real launch: the Kazakhstan data-residency question, WhatsApp/SMS
-confirmations, and deep localization.
+## Current limitations and next steps
+
+- Deploy a stable demo and verify the full flow from a clean account.
+- Improve visual polish and test mobile layouts.
+- Ask real shop owners to try the setup and booking flow; record feedback before claiming product impact.
+- Resolve the Kazakhstan data-residency question before handling real customer data commercially.
+- Add booking confirmations and stronger localization after validating the core workflow.
+
+## Project notes
+
+- [Architecture decisions](docs/DECISIONS.md)
+- [SQL test guide](supabase/tests/README.md)
+- [Application portfolio notes](docs/PORTFOLIO.md)
+
+---
+
+Booktau is a learning and product-development project. It is not presented as a launched business, a production-certified booking system, or a product with verified customer adoption.
